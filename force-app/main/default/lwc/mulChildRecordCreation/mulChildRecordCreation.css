@@ -1,0 +1,10 @@
+.combo{
+    margin-left: 25%;
+}
+
+.divider{
+    border: 0;
+    height: 1px;
+    background: #dcdcdc;
+    margin: 1rem 0
+}

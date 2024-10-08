@@ -2,19 +2,20 @@
 <template>
     <template if:false={showRecordCreated}>
         <lightning-card title="Create Child Record">
-            <div>
-                <lightning-datatable
+                <div>
+                    <lightning-datatable
                             key-field="id"
                             data={childRecords}
                             columns={columns}
                             onsave={handleDTSave}
                             hide-checkbox-column="true"
-                            column-widths-mode="auto"
-                    ></lightning-datatable>
-            </div>
-            <lightning-button label="Cancel" variant="neutral" onclick={handleCancel}></lightning-button>
-            <lightning-button label="Add Row" variant="neutral" onclick={handleAddRow}></lightning-button>
-            <lightning-button label="Create Records" variant="neutral" onclick={handleCreate} disabled ={disCreate}></lightning-button>
+                            column-widths-mode="auto"></lightning-datatable>
+                </div>
+                <footer class="slds-card__footer">
+                    <lightning-button label="Cancel" variant="neutral" onclick={handleCancel} ></lightning-button>
+                    <lightning-button label="Add Row" variant="neutral" onclick={handleAddRow} class="slds-m-left_x-small"></lightning-button>
+                    <lightning-button label="Create Records" variant="brand" onclick={handleCreate} disabled ={disCreate} class="slds-m-left_x-small"></lightning-button>
+                </footer>
         </lightning-card>    
     </template>
     <template if:true={showRecordCreated}>
@@ -26,11 +27,11 @@
                             columns={columns}
                             hide-checkbox-column="true"
                             column-widths-mode="auto"
-                            suppress-bottom-bar="true"
-                    ></lightning-datatable>
+                            suppress-bottom-bar="true"></lightning-datatable>
             </div>
-            <lightning-button label="Done" variant="neutral" onclick={handleDone}></lightning-button>
+            <footer class="slds-card__footer">
+                <lightning-button label="Done" variant="neutral" onclick={handleDone}></lightning-button>
+            </footer>
         </lightning-card>    
     </template>
-    
 </template>

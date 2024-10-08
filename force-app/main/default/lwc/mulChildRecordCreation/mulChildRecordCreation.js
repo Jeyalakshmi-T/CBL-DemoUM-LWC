@@ -1,33 +1,25 @@
 import { LightningElement, api, wire } from 'lwc';
-
-import { getObjectInfo } from 'lightning/uiObjectInfoApi';
-import { refreshApex } from "@salesforce/apex";
 import {ShowToastEvent} from 'lightning/platformShowToastEvent';
+import { CloseActionScreenEvent } from 'lightning/actions';
 
 import getFieldNames from '@salesforce/apex/mulChildRecorCrController.getFieldNames';   
 import createChildRecords from '@salesforce/apex/mulChildRecorCrController.createChildRecords';
 import getChildObjectList from '@salesforce/apex/mulChildRecorCrController.getChildObjectList';
 
-
 import mulChildRecordCreation from './mulChildRecordCreation.html';
 import mulChildRecordCreationA from './mulChildRecordCreationA.html';
-//import mulChildRecordCreationB from './mulChildRecordCreationB.html';
 
 const templateNameA = 'templateA';
-//const templateNameB = 'templateB';
 
 export default class MulChildRecordCreation extends LightningElement {
-    //records = records;
-    //columns1 = columns1;
+
     @api objectApiName;
     @api recordId;
     
     relObj=[];
     relObjName=[];
-    isShow=true;
     templateName;
     templateNameA = templateNameA;
-    //templateNameB = templateNameB;
     selObjectName;
     lstFields=[];
     columns=[];
@@ -45,44 +37,20 @@ export default class MulChildRecordCreation extends LightningElement {
         switch(this.templateName){
             case templateNameA :
                 return mulChildRecordCreationA;
-                
-            //case templateNameB :
-            //    return mulChildRecordCreationB;
-            
             default:
-                return mulChildRecordCreation;
+                return mulChildRecordCreation;    
         }
     }
-    /*
-    @wire(getObjectInfo, {objectApiName : '$objectApiName'})
-    ObjectInfo({error,data}){
-        if(data){
-            console.log('In Data :' + JSON.stringify(data));
-            console.log('In Data.RELATEDLIST  :' + JSON.stringify(data.childRelationships));
-            console.log('relObjName :' + JSON.stringify(this.relObjName));
-            this.relObj = data.childRelationships;
-        } else if(error){
-            console.log('In error :' + JSON.stringify(error));
-        }
-    }
-    */
+
     @wire(getChildObjectList, {parObjectName:'$objectApiName'})
     ObjectInfo({error,data}){
         if(data){
             this.relObj = data;
+            this.getChildObjectNames();
             console.log('In relObj :' + JSON.stringify(this.relObj));
         } else if(error){
             console.log('In error :' + JSON.stringify(error));
         }
-    }
-
-    handleClick(event){
-        console.log('In Handle click :' + this.isShow);
-        console.log('this.relObjName :' + this.relObjName );
-        
-        this.getChildObjectNames();
-        this.isShow=false;
-        console.log('In Handle click after :' + this.isShow);
     }
 
     getChildObjectNames(){
@@ -93,12 +61,6 @@ export default class MulChildRecordCreation extends LightningElement {
             this.relObjName.push({label : this.relObj[index], 
                         value : this.relObj[index]});
         }
-        /*
-        for (let index = 0; index < this.relObj.length; index++) {
-            this.relObjName.push({label : Object.values(this.relObj[index])[0], 
-                        value : Object.values(this.relObj[index])[0]});
-        }
-        */
         console.log('relObjName 11:' + JSON.stringify(this.relObjName));
     }
 
@@ -109,29 +71,39 @@ export default class MulChildRecordCreation extends LightningElement {
     }
 
     handleNext(){
-        console.log('In Handle Next');
-        this.templateName = this.templateNameA;
-        console.log('templateName :' + this.templateName);
-        this.getDisplayFields();
+        if(this.selObjectName == null){
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Please select a related object before proceeding.',
+                    variant: 'error',
+                }),
+            );
+        }else{
+            console.log('In Handle Next');
+            this.templateName = this.templateNameA;
+            console.log('templateName :' + this.templateName);
+            this.getDisplayFields();
+        }   
     }
 
-    handleCancel(){
+    handleCancel() {
+        this.dispatchEvent(new CloseActionScreenEvent());
         console.log('In Handle Cancel :' + this.templateName);
-        this.isShow = true;
         this.templateName ='';
     }
 
     handleDone(){
         console.log('In Handle Done :');
-        this.isShow = true;
+        //this.isShow = true;
         this.savedChildRecords = [];
         this.showRecordCreated = false;
+        this.dispatchEvent(new CloseActionScreenEvent());
         this.templateName =''; 
     }
 
     handleAddRow(){
         console.log('In Handle Add Row');
-
         this.createEmptyRecords(this.addOneRec);
         console.log(' Add Row Empty Record :' + JSON.stringify(this.emptyRecords));
         console.log('BF CR :' + JSON.stringify(this.childRecords));
@@ -231,5 +203,4 @@ export default class MulChildRecordCreation extends LightningElement {
         );
         })
     }
-
 }

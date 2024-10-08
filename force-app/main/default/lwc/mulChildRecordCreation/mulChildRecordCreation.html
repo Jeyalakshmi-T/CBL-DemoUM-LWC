@@ -1,21 +1,28 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-08-2024
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
-    <lightning-card title = "Child Records">
-        <div>
-            <template if:true={isShow}>
-                <lightning-button variant="brand" label="Create Records" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
-            </template>
-            <template if:false={isShow}>
+    <lightning-card title="Create Child Records">
+        <hr class="divider">
+        <div class="slds-p-horizontal_small">
+            <div class="slds-size_large combo">
                 <lightning-combobox
                     name="Related Object"
                     label="Related Object"
                     value={value}
                     placeholder="Select Object"
                     options={relObjName}
-                    onchange={handleChange} >
-                </lightning-combobox>
+                    onchange={handleChange}></lightning-combobox>
+            </div>
+
+            <footer class="slds-card__footer">
+                <lightning-button variant="neutral" label="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button>
                 <lightning-button variant="brand" label="Next" onclick={handleNext} class="slds-m-left_x-small"></lightning-button>
-                <lightning-button variant="brand" label="Cancel" onclick={handleCancel} class="slds-m-left_x-small"></lightning-button>
-        </template>
+            </footer>
         </div>
     </lightning-card>
 </template>
