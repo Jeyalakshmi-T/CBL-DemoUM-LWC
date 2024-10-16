@@ -1,7 +1,14 @@
+<!--
+  @description       : Initial Setup Component to select Parent and Child Object
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 04-01-2024
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
     <lightning-card title="Value Selector">
         <div style="padding-left: 30px;">
-            <!-- All Parent Object Combo Box -->
+            <!--All Objects Parent-->
             <div class="slds-size_medium">
                 <lightning-combobox name="Parent Object"
                                     label="Select Parent Object"
@@ -11,7 +18,7 @@
                                     onchange={handleComboChange} ></lightning-combobox>
             </div>
 
-            <!-- All Child Object based on the selected Parent --> 
+            <!--Related Child Objects-->
             <lightning-combobox name="Child Object"
                                     label="Select Child Object"
                                     value={selectedChildObject}
@@ -22,24 +29,22 @@
             <!-- Footer Buttons -->
             <footer class="slds-card__footer">
                 <lightning-button variant="neutral" 
-                                  label="Cancel" 
-                                  onclick={handleCancel} 
-                                  class="slds-m-left_x-small"></lightning-button>
+                                    label="Cancel" 
+                                    onclick={handleCancel} 
+                                    class="slds-m-left_x-small"></lightning-button>
                                   
                 <lightning-button variant="brand" 
-                                  label="Next" 
-                                  onclick={handleNext} 
-                                  class="slds-m-left_x-small"></lightning-button>
-                <template if:true={showModal}>
-                <c-modal-set-up-comp      
-                                  selected-parent-object ={selectedParentObject}
-                                  selected-child-object ={selectedChildObject}          
-                                  onmodalcancel={handleModalCancel}
-                                  onmodalsuccess={handleModalSucess}>
-                </c-modal-set-up-comp>
-                
-                
-            </template>
+                                    label="Next" 
+                                    onclick={handleNext} 
+                                    class="slds-m-left_x-small"></lightning-button>
+                    <template if:true={showModal}>
+                        <c-modal-set-up-comp      
+                                        selected-parent-object ={selectedParentObject}
+                                        selected-child-object ={selectedChildObject}          
+                                        onmodalcancel={handleModalCancel}
+                                        onmodalsuccess={handleModalSucess}>
+                        </c-modal-set-up-comp>
+                    </template>
             </footer>     
         </div>
     </lightning-card>

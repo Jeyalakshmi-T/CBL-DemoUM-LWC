@@ -49,11 +49,16 @@ public with sharing class FieldTypeValue {
                 return Date.valueOf(fieldValue);
             }
             when DATETIME {
-                return DateTime.valueOf(fieldValue);
+                if(fieldValue.endsWith('Z')){
+                    fieldValue = fieldValue.substring(0, fieldValue.length() - 1); // Remove 'Z'
+                    return DateTime.valueOf(fieldValue.replace('T', ' '));
+                }else{
+                    return DateTime.valueOf(fieldValue);
+                }
+                
             }
             when else {
-                // Default to string for unknown types
-                return fieldValue;
+                return fieldValue; // Default to string for unknown types
             }
         }
     }       

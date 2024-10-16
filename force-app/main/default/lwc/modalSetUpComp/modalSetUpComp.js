@@ -17,27 +17,22 @@ export default class SetUpCompModal extends LightningElement {
     lookUpfieldOptions = [];
     selectedLookUpField = '';
 
-
-    connectedCallback(){
-        console.log("In Child Component - ");
-    } 
-
+    //wire function to get lookup fields
     @wire(getChildObjectLookupFields, { childObjectName: '$selectedChildObject', parentObjectName: '$selectedParentObject'  })
     wiredObjectInfo({ error, data }) {
         if (data) {
-            console.log('Data LookUp Fields - ', JSON.stringify(data));
-        
             this.lookUpfieldOptions = data.map(fields => ({ label: fields, value: fields }));
             this.getAllOtherFields();
         } else if (error) {
             console.log('Error fetching object info', JSON.stringify(error));
         }
     }
+
+    //method to get all other selected fields 
     getAllOtherFields(){
         getAllFields({childObjectApiName: this.selectedChildObject})
         .then(response=>{
             this.fieldOptions = response.map(fields => ({ label: fields, value: fields }));
-            console.log('fieldOptions :' + JSON.stringify(this.fieldOptions));
         })
         .catch(error=>{
             let message = 'Unknown error';
@@ -53,26 +48,22 @@ export default class SetUpCompModal extends LightningElement {
                 variant: 'error',
             }),
         );
-        })
-        
+        }) 
     }
 
     handleFieldChange(event){
         this.selectedFields = event.detail.value;
-        console.log('selectedFields in dualBox - ', this.selectedFields);
-
     }
 
     handleFieldCh(event){
         this.selectedLookUpField = event.detail.value;
-        console.log('selectedLookUpField in dualBox - ', this.selectedLookUpField);
     }
 
 
+    //to create custom field sets records
     handleCreateFieldSet(){
         createFieldSet({ parObjectName: this.selectedParentObject, lookUpField:this.selectedLookUpField, objectApiName: this.selectedChildObject, fields: this.selectedFields })
         .then(result => {
-            console.log('Field set created:', result);
             let messageResult = result;
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -84,7 +75,6 @@ export default class SetUpCompModal extends LightningElement {
             this.dispatchEvent(new CustomEvent('modalsuccess'));
         })
         .catch(error => {
-            console.error('Error creating field set:', JSON.stringify(error));
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Error',
@@ -95,11 +85,9 @@ export default class SetUpCompModal extends LightningElement {
         });
     }
 
-
     get modalClass() {
         return this.showModal ? 'modal show-modal' : 'modal';
     }
-
 
     handleModalCancel(){
         this.dispatchEvent(new CustomEvent('modalcancel')); 

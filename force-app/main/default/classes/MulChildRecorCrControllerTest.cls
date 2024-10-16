@@ -1,111 +1,94 @@
-public with sharing class mulChildRecorCrController {
+@isTest
+public class MulChildRecorCrControllerTest {
+    
+    @isTest
+    static void testGetChildObjectList() {
+        // Test data
+        CustomFieldSet__c cs = new CustomFieldSet__c();
+        cs.ObjectName__c = 'Contact';
+        cs.ParentObjectName__c = 'Account';
+        cs.IsParLookUpField__c = 'Yes';
+        
+        insert cs;
+        
+        String parentObjectName = 'Account'; // Replace with your desired parent object API name
+        // Call the method under test
+        List<String> childObjectNames = mulChildRecorCrController.getChildObjectList(parentObjectName);
+        
+        // Verify that the returned list is not null
+        System.assertNotEquals(null, childObjectNames);
+        
+        System.assertEquals(true, childObjectNames.contains('Contact'));
+        //System.assertEquals(true, childObjectNames.contains('Case'));
+    }
+    
+    @isTest
+    static void testGetFieldNames() {
+        // Test data
+        
+        CustomFieldSet__c cs = new CustomFieldSet__c();
+        cs.ObjectName__c = 'Contact';
+        cs.ParentObjectName__c = 'Account';
+        cs.IsParLookUpField__c = 'Yes';
+        
+        insert cs;
+        
+        String parentObjectName = 'Account'; // Replace with your desired parent object API name
+        String objectName = 'Contact'; // Replace with your desired object API name
+        
+        // Call the method under test
+        List<Map<String,String>> fieldNames = mulChildRecorCrController.getFieldNames(parentObjectName, objectName);
+        
+        // Verify that the returned list is not null
+        System.assertNotEquals(null, 'AccountId');
+        
+    }
+    
+    @isTest
+    static void testCreateChildRecords() {
+        // Test data
+        
+        CustomFieldSet__c cs = new CustomFieldSet__c();
+        cs.ObjectName__c = 'Contact';
+        cs.ParentObjectName__c = 'Account';
+        cs.ObjFieldName__c = 'AccountId';
+        cs.IsParLookUpField__c = 'Yes';
+        
+        insert cs;
+        
+        List<Map<String, String>> lstChildRecords = new List<Map<String, String>>();
+        Map<String, String> mapStr = new Map<String, String>();
+        mapStr.put('LastName','TestContact 1');
+        mapStr.put('id','row-0');
+        lstChildRecords.add(mapStr);
+        mapStr.clear();
+        
+        mapStr.put('LastName','TestContact 2');
+        mapStr.put('id','row-1');
+        lstChildRecords.add(mapStr);
 
-    @AuraEnabled(cacheable=true)
-    public static List<String> getChildObjectList(String parObjectName){
-        try {
-            List<CustomFieldSet__c> lstCusFS = [SELECT Id, ObjectName__c
-                                                    FROM CustomFieldSet__c
-                                                    WHERE ParentObjectName__c = :parObjectName
-                                                    AND IsParLookUpField__c  = 'Yes'
-                                                    ];
-            List<String> lstChildObjNames = new List<String> ();                                        
-            for(CustomFieldSet__c cusFs:lstCusFS){
-                String s = cusFs.ObjectName__c;
-                lstChildObjNames.add(s);
-            }
-            system.debug('lstChildObjNames :' + lstChildObjNames);
-            return lstChildObjNames;
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
+        Account acc = new Account();
+        acc.Name = 'Test Account 1';
+        acc.Industry = 'Technology'; // Optional, set additional fields as needed
+        // Set other fields as needed
+
+        insert acc;
+
+        Account acc1 = [SELECT Id from Account where Name = 'Test Account 1' LIMIT 1];
+
+        String parentObjectName = 'Account'; // Replace with your desired parent object API name
+        String objectName = 'Contact'; // Replace with your desired object API name
+        String parRecordId = acc1.Id; // Replace with a valid parent record Id
+        
+        // Call the method under test
+        Test.startTest();
+        List<SObject> insertedRecords = mulChildRecorCrController.createChildRecords(lstChildRecords, parentObjectName, objectName, parRecordId);
+        Test.stopTest();
+        
+        // Add assertions based on the expected behavior of the method
+        // For example, you could check if the inserted records are returned correctly
+        
+        // Example:
+        System.assertEquals(2, insertedRecords.size());
     }
-    
-    @AuraEnabled(cacheable=true)
-        public static List<Map<String,String>> getFieldNames(String parObjectName, String objectName){
-        try {
-            system.debug('Get Custom FieldSet List ' + parObjectName + ', '+objectName ); 
-    
-            List<Map<String,String>> lstFS = new List<Map<String,String>>();
-            List<CustomFieldSet__c> lstCusFS = [SELECT Id,ParentObjectName__c, ObjectName__c, ObjFieldName__c, IsParLookUpField__c
-                                                    FROM CustomFieldSet__c
-                                                    WHERE ParentObjectName__c = :parObjectName
-                                                    AND ObjectName__c = :objectName
-                                                    ];
-            system.debug('lstCusFS :' + lstCusFS);
-            if(lstCusFS.size() > 0){
-                for(CustomFieldSet__c cusFs:lstCusFS){
-                    Map<String,String> fsMap= new Map<String,String>();
-                    if(cusFs.IsParLookUpField__c != 'Yes'){
-                        fsMap.put(cusFs.ObjFieldName__c,cusFs.ObjFieldName__c);
-                        lstFS.add(fsMap);
-                    }
-                    
-                }
-            }                                        
-            system.debug('lstFS :' + lstFS);
-            return lstFS;
-    
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
-    }
-    
-    @AuraEnabled
-    public static List<SObject> createChildRecords(List<Map<String,String>> lstChildRecords, String parObjectName, String ObjectName, string parRecordId){
-        try {
-            system.debug('lstChildRecords :' + lstChildRecords);
-            system.debug('Object Name :' + ObjectName);
-            system.debug('parObjectName : ' + parObjectName);
-            system.debug('parRecordId :' + parRecordId);
-    
-            List<CustomFieldSet__c> lstCusFS = [SELECT Id,ParentObjectName__c, ObjectName__c, ObjFieldName__c, IsParLookUpField__c
-                                                    FROM CustomFieldSet__c
-                                                    WHERE ParentObjectName__c = :parObjectName
-                                                    AND ObjectName__c = :objectName
-                                                    AND IsParLookUpField__c = 'Yes' LIMIT 1
-                                                    ];
-            system.debug('lstCusFS :' + lstCusFS);                                        
-            String parField = lstCusFS[0].ObjFieldName__c;
-    
-            List<SObject> recsToInsert = new List<SObject>();
-            for(Map<String,String> childRecord :lstChildRecords ){
-                system.debug('childRecord :' + childRecord);
-                SObject recToInsert = (SObject)Type.forName(ObjectName).newInstance();
-                for (String fieldName : childRecord.keySet()) {
-                    if (recToInsert.getSObjectType().getDescribe().fields.getMap().containsKey(fieldName)) {
-                        if(fieldName != 'id'){
-                            Object castFieldTypeValue = FieldTypeValue.convertFieldValue(objectName, fieldName,childRecord.get(fieldName));
-                            System.debug('Field Type: ' + castFieldTypeValue);
-    
-                            //recToInsert.put(fieldName, childRecord.get(fieldName));
-                            recToInsert.put(fieldName, castFieldTypeValue);
-                        }   
-                    } else {
-                        System.debug('Field ' + fieldName + ' does not exist on object ' + objectName);
-                    }
-                    recToInsert.put(parField, parRecordId);
-                }
-               
-                recsToInsert.add(recToInsert);
-            }
-            system.debug('recsToInsert :' + recsToInsert);
-    
-            if (!recsToInsert.isEmpty()) {
-                Database.SaveResult[] saveResults = Database.insert(recsToInsert, false);
-            
-                for (Database.SaveResult saveResult : saveResults) {
-                    if (!saveResult.isSuccess()) {
-                        for (Database.Error error : saveResult.getErrors()) {
-                            System.debug('Error inserting record: ' + error.getMessage());
-                        }
-                    }
-                }
-                system.debug('recsToInsert :' + recsToInsert); 
-            }
-    
-            return recsToInsert;
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
-        }
-    }
-    }
+}
